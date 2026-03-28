@@ -1,5 +1,35 @@
-node_modules/
-dist/
-vault/.obsidian/plugins/wotd/main.js
-vault/.obsidian/plugins/wotd/data.json
-site
+# Obsidian config (vault-specific)
+.obsidian
+
+# Reference repos
+ref
+
+# Scratch notes
+scratchpad.md
+
+# Dolt server runtime files (not the Beads database, which is managed by .beads/.gitignore)
+.dolt/
+
+# npm
+node_modules
+
+# Build output is in e2e-vault/ (already gitignored below)
+
+# Sourcemaps
+*.map
+
+# Obsidian plugin data (user-specific settings)
+data.json
+
+# E2E test artifacts
+vault/
+e2e-vault/
+.obsidian-config-e2e/
+test-results/
+playwright-report/
+
+# Docs site build output
+site/
+
+# OS files
+.DS_Store
