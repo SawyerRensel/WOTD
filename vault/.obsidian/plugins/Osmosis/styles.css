@@ -1,0 +1,1663 @@
+/*
+Osmosis plugin styles.
+Uses Obsidian CSS variables for theme compatibility.
+*/
+
+.osmosis-mindmap-container {
+	position: relative;
+	overflow: hidden;
+	height: 100%;
+	padding: 0;
+	outline: none;
+	cursor: grab;
+	touch-action: none;
+}
+
+.osmosis-mindmap-container:active {
+	cursor: grabbing;
+}
+
+/* Mobile editing: SVG gets position:fixed inline to escape Obsidian's
+   layout resize when the keyboard opens. No CSS overrides needed here. */
+
+.osmosis-mindmap-svg {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.osmosis-node {
+	fill: var(--background-secondary);
+	stroke: var(--background-modifier-border);
+	stroke-width: 1;
+}
+
+.osmosis-node-heading {
+	fill: var(--background-primary-alt);
+	stroke: var(--background-modifier-border);
+	stroke-width: 1;
+}
+
+/* Shape: underline — bottom line only, no background fill */
+.osmosis-node-group[data-shape="underline"] > .osmosis-node {
+	fill: none;
+}
+
+/* Shape: none — fully invisible background */
+.osmosis-node-group[data-shape="none"] > .osmosis-node {
+	fill: none;
+	stroke: none;
+}
+
+.osmosis-node-content {
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	padding: 4px 8px;
+	box-sizing: border-box;
+	color: var(--text-normal);
+	font-size: 13px;
+	font-family: var(--font-text);
+	line-height: 1.3;
+	pointer-events: none;
+}
+
+/* Heading-level typography: size + weight scaled by depth.
+   data-depth is set on .osmosis-node-content for both SVG render and measurement. */
+.osmosis-node-content[data-depth="1"] {
+	font-size: 20px;
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+.osmosis-node-content[data-depth="2"] {
+	font-size: 17px;
+	font-weight: 650;
+	line-height: 1.25;
+}
+
+.osmosis-node-content[data-depth="3"] {
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1.25;
+}
+
+.osmosis-node-content[data-depth="4"] {
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.3;
+}
+
+.osmosis-node-content[data-depth="5"] {
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.3;
+}
+
+.osmosis-node-content[data-depth="6"] {
+	font-size: 13px;
+	font-weight: 550;
+	line-height: 1.3;
+}
+
+/* Allow clicking links and checkboxes inside nodes in view mode */
+.osmosis-node-content a,
+.osmosis-node-content input[type="checkbox"] {
+	pointer-events: auto;
+	cursor: pointer;
+}
+
+.osmosis-node-content input[type="checkbox"] {
+	vertical-align: middle;
+	margin: 0 4px 0 0;
+}
+
+/* Let Obsidian's markdown-rendered styles handle typography.
+   Only tighten first/last element margins to avoid excess whitespace in nodes. */
+.osmosis-node-content > :first-child,
+.osmosis-node-content > div > :first-child {
+	margin-top: 0;
+}
+.osmosis-node-content > :last-child,
+.osmosis-node-content > div > :last-child {
+	margin-bottom: 0;
+}
+
+.osmosis-node-content img,
+.osmosis-node-content video {
+	max-width: 100%;
+	max-height: 100%;
+	object-fit: contain;
+}
+
+.osmosis-node-content audio {
+	width: 100%;
+	min-width: 250px;
+}
+
+/* Allow media controls to receive pointer events */
+.osmosis-node-content audio,
+.osmosis-node-content video,
+.osmosis-node-content iframe.osmosis-video-embed {
+	pointer-events: auto;
+}
+
+.osmosis-node-content iframe.osmosis-video-embed {
+	width: 100%;
+	aspect-ratio: 16 / 9;
+	min-width: 280px;
+	border: none;
+	border-radius: 4px;
+}
+
+/* Hide Obsidian's copy button inside mind map nodes (non-functional in SVG foreignObject) */
+.osmosis-node-content .copy-code-button,
+.osmosis-node-content button.copy-code-button {
+	display: none !important;
+}
+
+/* Code block language label */
+.osmosis-node-group-codeblock .osmosis-node-content {
+	position: relative;
+}
+
+.osmosis-code-lang-label {
+	position: absolute;
+	top: 2px;
+	right: 2px;
+	font-size: 10px;
+	font-family: var(--font-monospace);
+	color: var(--text-faint);
+	text-transform: lowercase;
+	pointer-events: none;
+}
+
+/* Measurement cell: allow content to flow naturally for Range measurement.
+   Width is set via inline style in JS (wide for initial, constrained for wrap). */
+.osmosis-measure-cell {
+	overflow: visible !important;
+	height: auto !important;
+	display: block !important;
+	align-items: initial !important;
+}
+
+/* Force block-level children (p, h1-h6, ul, ol, pre, etc.) to shrink-wrap
+   so Range.getBoundingClientRect() returns actual content width, not 100%. */
+.osmosis-measure-cell > * {
+	width: fit-content;
+}
+
+.osmosis-branch-line {
+	fill: none;
+	stroke: var(--background-modifier-border);
+	stroke-width: 1.5;
+}
+
+/* Collapse/expand animation */
+.osmosis-animating .osmosis-node-group,
+.osmosis-animating .osmosis-branch-line {
+	transition: transform 80ms ease-out, opacity 80ms ease-out;
+}
+
+/* Selection — !important needed to override inline theme styles on shape elements */
+.osmosis-node-selected > .osmosis-node {
+	stroke: var(--interactive-accent) !important;
+	stroke-width: 2 !important;
+	stroke-dasharray: none !important;
+}
+
+/* Cursor sync highlight (editor cursor → map node) */
+.osmosis-node-cursor-synced > .osmosis-node {
+	stroke: var(--text-accent) !important;
+	stroke-width: 2 !important;
+	stroke-dasharray: 4 2 !important;
+}
+
+/* Rubber-band selection */
+.osmosis-rubber-band {
+	fill: var(--interactive-accent);
+	fill-opacity: 0.1;
+	stroke: var(--interactive-accent);
+	stroke-width: 1;
+	stroke-dasharray: 4 2;
+	pointer-events: none;
+}
+
+/* Drag-and-drop */
+.osmosis-dragging {
+	cursor: grabbing !important;
+}
+
+.osmosis-drag-ghost {
+	opacity: 0.6;
+	pointer-events: none;
+}
+
+.osmosis-drop-indicator {
+	stroke: var(--interactive-accent);
+	stroke-width: 3;
+	stroke-dasharray: 6 3;
+	pointer-events: none;
+}
+
+/* Resize handle (circle dot on right edge) */
+.osmosis-resize-handle {
+	cursor: ew-resize;
+	fill: var(--interactive-accent);
+	stroke: var(--background-primary);
+	stroke-width: 1;
+	opacity: 0;
+	transition: opacity 0.15s;
+}
+
+.osmosis-node-group:hover .osmosis-resize-handle {
+	opacity: 0.7;
+}
+
+/* Collapse toggle */
+.osmosis-collapse-toggle {
+	cursor: pointer;
+}
+
+.osmosis-collapse-circle {
+	fill: var(--background-secondary);
+	stroke: var(--background-modifier-border);
+	stroke-width: 1;
+}
+
+.osmosis-collapse-toggle:hover .osmosis-collapse-circle {
+	fill: var(--background-modifier-hover);
+}
+
+.osmosis-collapse-icon {
+	fill: var(--text-muted);
+	font-size: 10px;
+	font-family: var(--font-monospace);
+	user-select: none;
+}
+
+/* Unresolved transclusion */
+.osmosis-node-group-transclusion.osmosis-node-unresolved > .osmosis-node {
+	stroke: var(--text-faint);
+	stroke-dasharray: 4 2;
+}
+
+/* Cyclic transclusion indicator */
+.osmosis-node-cyclic > .osmosis-node {
+	stroke: var(--text-warning);
+	stroke-width: 2;
+	stroke-dasharray: 6 3;
+}
+
+.osmosis-cycle-indicator {
+	color: var(--text-warning);
+	font-size: 12px;
+	font-style: italic;
+}
+
+/* Transcluded branch visual distinction (opt-in via settings) */
+.osmosis-node-transcluded > .osmosis-node {
+	stroke: var(--text-accent);
+	stroke-dasharray: 3 2;
+	stroke-opacity: 0.6;
+}
+
+/* Inline editing — overlay positioned outside the SVG */
+.osmosis-fo-hidden {
+	visibility: hidden;
+}
+
+/* Embedded editor container */
+.osmosis-edit-overlay {
+	border: 2px solid var(--interactive-accent);
+	border-radius: 4px;
+	background: var(--background-primary);
+	box-sizing: border-box;
+	height: fit-content;
+	overflow: visible;
+}
+
+/* Save/Cancel buttons float above the editor container */
+.osmosis-edit-btn {
+	position: absolute;
+	top: -32px;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	height: 28px;
+	padding: 0 10px;
+	border: none;
+	border-radius: 4px;
+	background: var(--background-secondary);
+	color: var(--text-muted);
+	font-size: 13px;
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.osmosis-edit-btn:hover {
+	color: var(--text-normal);
+}
+
+.osmosis-edit-cancel {
+	left: 0;
+}
+
+.osmosis-edit-cancel:hover {
+	color: var(--text-error);
+}
+
+.osmosis-edit-save {
+	right: 0;
+}
+
+.osmosis-edit-save:hover {
+	color: var(--interactive-accent);
+}
+
+/* Stack buttons vertically on right side when container is narrow */
+.osmosis-edit-overlay.osmosis-edit-narrow .osmosis-edit-btn {
+	left: auto;
+	right: -2px;
+}
+
+.osmosis-edit-overlay.osmosis-edit-narrow .osmosis-edit-cancel {
+	top: -64px;
+}
+
+.osmosis-edit-overlay.osmosis-edit-narrow .osmosis-edit-save {
+	top: -32px;
+}
+
+/* Hide CM6 chrome not needed in node editing */
+.osmosis-edit-overlay .cm-gutters,
+.osmosis-edit-overlay .cm-lineNumbers,
+.osmosis-edit-overlay .cm-foldGutter {
+	display: none !important;
+}
+
+/* Match node text styling */
+.osmosis-edit-overlay .cm-content {
+	padding: 4px 8px;
+	font-size: inherit;
+	line-height: 1.3;
+}
+
+/* Remove CM6 default focus outline (container already has border) */
+.osmosis-edit-overlay .cm-focused {
+	outline: none !important;
+}
+
+/* Ensure the editor fills its container */
+.osmosis-edit-overlay .cm-editor {
+	height: 100%;
+	overflow: hidden;
+}
+
+/* Fallback textarea (used if embedded editor fails) */
+.osmosis-fallback-textarea {
+	border: none;
+	outline: none;
+	background: transparent;
+	color: var(--text-normal);
+	font-family: var(--font-text);
+	padding: 4px 8px;
+	box-sizing: border-box;
+	line-height: 1.3;
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+	white-space: pre-wrap;
+	resize: none;
+	overflow: auto;
+}
+
+/* Tool ribbon (action bar) */
+.osmosis-toolbar {
+	position: absolute;
+	bottom: 8px;
+	left: 50%;
+	transform: translateX(-50%);
+	max-width: calc(100% - 16px);
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	padding: 4px 6px;
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	z-index: 10;
+	box-shadow: var(--shadow-s);
+	pointer-events: auto;
+	overflow-x: auto;
+	overflow-y: hidden;
+	/* Hide scrollbar while keeping scroll functional */
+	scrollbar-width: none; /* Firefox */
+}
+
+.osmosis-toolbar::-webkit-scrollbar {
+	display: none; /* Chrome, Safari */
+}
+
+/* Mobile: raise above Obsidian's bottom nav bar */
+.is-mobile .osmosis-toolbar {
+	bottom: 80px;
+}
+
+.osmosis-toolbar-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 28px;
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	border: none;
+	border-radius: 4px;
+	background: transparent;
+	color: var(--icon-color);
+	cursor: pointer;
+	flex-shrink: 0;
+}
+
+.osmosis-toolbar-btn:hover:not(.is-disabled) {
+	background: var(--background-modifier-hover);
+	color: var(--icon-color-hover);
+}
+
+.osmosis-toolbar-btn.is-disabled {
+	color: var(--text-faint);
+	opacity: 0.4;
+	cursor: default;
+}
+
+.osmosis-toolbar-hidden {
+	display: none;
+}
+
+.osmosis-toolbar-divider {
+	width: 1px;
+	height: 20px;
+	margin: 0 4px;
+	background: var(--background-modifier-border);
+	flex-shrink: 0;
+}
+
+/* ─── Properties Sidebar: Compact Layout ──────────────── */
+
+.workspace-leaf-content[data-type="osmosis-properties"] .setting-item {
+	padding: 4px 0;
+	min-height: 0;
+}
+
+.workspace-leaf-content[data-type="osmosis-properties"] .setting-item-info {
+	padding-right: 8px;
+}
+
+.workspace-leaf-content[data-type="osmosis-properties"] .setting-item-name {
+	font-size: var(--font-ui-small);
+}
+
+.workspace-leaf-content[data-type="osmosis-properties"] .setting-item-description {
+	font-size: 10px;
+	margin-top: 0;
+}
+
+.workspace-leaf-content[data-type="osmosis-properties"] .setting-item:not(:last-child) {
+	border-bottom: none;
+}
+
+/* ─── Properties Sidebar: Tab Bar ─────────────────────── */
+
+.osmosis-tab-bar {
+	display: flex;
+	gap: 4px;
+	padding: 4px 6px;
+	margin-bottom: 4px;
+}
+
+.osmosis-tab-btn {
+	flex: 1;
+	padding: 6px 12px;
+	border: none;
+	background: none;
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+	cursor: pointer;
+	border-radius: var(--radius-s);
+	transition: color 0.15s, background 0.15s;
+}
+
+.osmosis-tab-btn:hover {
+	color: var(--text-normal);
+	background: var(--background-modifier-hover);
+}
+
+.osmosis-tab-btn.is-active {
+	color: var(--text-normal);
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.osmosis-tab-content.is-hidden {
+	display: none;
+}
+
+/* ─── Properties Sidebar: Format Tab ──────────────────── */
+
+.osmosis-format-no-selection {
+	padding: 8px;
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+	text-align: center;
+}
+
+.osmosis-format-no-selection.is-hidden {
+	display: none;
+}
+
+.osmosis-format-section {
+	margin: 0 6px 10px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	background: var(--background-secondary);
+}
+
+.osmosis-format-section.is-disabled {
+	opacity: 0.4;
+	pointer-events: none;
+}
+
+.osmosis-format-section-header {
+	display: flex;
+	align-items: center;
+	padding: 5px 8px;
+	cursor: pointer;
+	font-size: var(--h5-size, 0.95em);
+	font-weight: var(--h5-weight, 700);
+	color: var(--h5-color, var(--text-normal));
+	user-select: none;
+}
+
+.osmosis-format-section-header:hover {
+	background: var(--background-modifier-hover);
+}
+
+.osmosis-format-section-header > .osmosis-chevron-icon {
+	display: flex;
+	align-items: center;
+	margin-right: 4px;
+	transition: transform 0.15s;
+	color: var(--text-faint);
+}
+
+.osmosis-format-section-header > .osmosis-chevron-icon svg {
+	width: 14px;
+	height: 14px;
+}
+
+.osmosis-format-section:not(.is-collapsed) .osmosis-format-section-header > .osmosis-chevron-icon {
+	transform: rotate(90deg);
+}
+
+.osmosis-format-section.is-collapsed .osmosis-format-section-body {
+	display: none;
+}
+
+.osmosis-format-section-body {
+	padding: 2px 8px 4px;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+/* ─── Format Tab: Reset Buttons ──────────────────────── */
+
+.osmosis-format-reset-all {
+	padding: 2px 8px 4px;
+}
+
+.osmosis-format-reset-btn {
+	width: 100%;
+	padding: 4px 8px;
+	font-size: var(--font-ui-small);
+	color: var(--text-muted);
+	background: var(--background-modifier-hover);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	cursor: pointer;
+}
+
+.osmosis-format-reset-btn:hover {
+	color: var(--text-normal);
+	background: var(--background-modifier-active-hover);
+}
+
+.osmosis-format-section-reset-btn {
+	margin-left: auto;
+	width: 24px;
+	height: 24px;
+	padding: 0;
+	font-size: 14px;
+	line-height: 24px;
+	text-align: center;
+	color: var(--text-faint);
+	background: none;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	cursor: pointer;
+}
+
+.osmosis-format-section-reset-btn:hover {
+	color: var(--text-normal);
+	background: var(--background-modifier-hover);
+}
+
+/* ─── Format Tab: Class Management ───────────────────── */
+
+.osmosis-class-header-btns {
+	display: flex;
+	gap: 2px;
+	margin-left: auto;
+}
+
+.osmosis-class-icon-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	padding: 0;
+	border: none;
+	border-radius: var(--radius-s);
+	background: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+}
+
+.osmosis-class-icon-btn svg {
+	width: 14px;
+	height: 14px;
+}
+
+.osmosis-class-icon-btn:hover {
+	color: var(--text-normal);
+	background: var(--background-modifier-hover);
+}
+
+.osmosis-class-delete-btn:hover {
+	color: var(--text-error);
+}
+
+.osmosis-save-to-class-btn.is-hidden {
+	display: none;
+}
+
+/* ─── Map Tab: Variant Section ───────────────────────── */
+
+.osmosis-variant-section {
+	margin-bottom: 8px;
+}
+
+.osmosis-variant-header {
+	display: flex;
+	align-items: center;
+	padding: 4px 0;
+}
+
+.osmosis-variant-label {
+	font-size: var(--font-ui-small);
+	color: var(--text-muted);
+	font-weight: var(--font-semibold);
+}
+
+.osmosis-variant-delete-btn:hover {
+	color: var(--text-error);
+}
+
+.osmosis-save-to-variant-btn.is-hidden {
+	display: none;
+}
+
+/* ─── Map Tab: Style Section Divider ─────────────────── */
+
+hr.osmosis-map-style-divider {
+	border: none;
+	border-top: 1px solid var(--background-modifier-border);
+	margin: 8px 0;
+}
+
+/* ─── Format Tab: Color Swatch Button ────────────────── */
+
+.osmosis-color-swatch-btn {
+	width: 28px;
+	height: 28px;
+	border-radius: 4px;
+	border: 1px solid var(--background-modifier-border);
+	cursor: pointer;
+	flex-shrink: 0;
+}
+
+.osmosis-color-swatch-btn:hover {
+	border-color: var(--interactive-accent);
+}
+
+/* ─── Format Tab: Text Alignment Buttons ─────────────── */
+
+.osmosis-align-group {
+	display: flex;
+	gap: 2px;
+}
+
+.osmosis-align-btn {
+	padding: 4px 8px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background: var(--background-secondary);
+	cursor: pointer;
+	font-size: 14px;
+	line-height: 1;
+}
+
+.osmosis-align-btn:hover {
+	background: var(--background-modifier-hover);
+}
+
+.osmosis-align-btn.is-active {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-color: var(--interactive-accent);
+}
+
+/* ─── Format Tab: Font Row ───────────────────────────── */
+
+.osmosis-format-font-row .setting-item-control {
+	min-width: 120px;
+}
+
+/* ─── Color Picker Popover ────────────────────────────── */
+
+.osmosis-color-picker {
+	position: fixed;
+	top: var(--picker-top, 0);
+	left: var(--picker-left, 0);
+	z-index: var(--layer-popover);
+	width: 232px;
+	max-height: var(--picker-max-height, none);
+	overflow-y: auto;
+	padding: 8px;
+	background: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	box-shadow: var(--shadow-s);
+}
+
+.osmosis-color-picker.is-flipped {
+	top: auto;
+	bottom: var(--picker-bottom, 0);
+}
+
+.osmosis-cp-section-label {
+	font-size: var(--font-ui-smaller);
+	font-weight: 600;
+	color: var(--text-muted);
+	margin: 6px 0 3px;
+}
+
+.osmosis-cp-section-label:first-child {
+	margin-top: 0;
+}
+
+.osmosis-cp-swatches {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+}
+
+.osmosis-cp-swatch {
+	width: 22px;
+	height: 22px;
+	border-radius: 4px;
+	background-color: var(--swatch-color);
+	border: 1px solid var(--background-modifier-border);
+	cursor: pointer;
+	transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.osmosis-cp-swatch:hover {
+	transform: scale(1.15);
+	box-shadow: 0 0 0 2px var(--interactive-accent);
+}
+
+.osmosis-cp-swatch.is-selected {
+	box-shadow: 0 0 0 2px var(--interactive-accent);
+}
+
+.osmosis-cp-add-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--text-muted);
+	background: var(--background-secondary);
+	border-style: dashed;
+}
+
+.osmosis-cp-add-btn:hover {
+	color: var(--text-normal);
+}
+
+/* Freeform selector */
+
+.osmosis-cp-freeform {
+	margin-top: 4px;
+}
+
+.osmosis-cp-canvas-wrapper {
+	position: relative;
+	width: 100%;
+	height: 150px;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.osmosis-cp-sl-canvas {
+	width: 100%;
+	height: 100%;
+	display: block;
+	cursor: crosshair;
+}
+
+.osmosis-cp-crosshair {
+	position: absolute;
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	border: 2px solid white;
+	box-shadow: 0 0 2px rgba(0, 0, 0, 0.6);
+	transform: translate(-50%, -50%);
+	pointer-events: none;
+}
+
+.osmosis-cp-hue-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 6px;
+}
+
+.osmosis-cp-label {
+	font-size: var(--font-ui-smaller);
+	font-weight: 600;
+	color: var(--text-muted);
+	width: 12px;
+	flex-shrink: 0;
+}
+
+.osmosis-cp-hue-slider {
+	flex: 1;
+	-webkit-appearance: none;
+	appearance: none;
+	height: 12px;
+	border-radius: 6px;
+	background: linear-gradient(to right,
+		hsl(0, 100%, 50%),
+		hsl(60, 100%, 50%),
+		hsl(120, 100%, 50%),
+		hsl(180, 100%, 50%),
+		hsl(240, 100%, 50%),
+		hsl(300, 100%, 50%),
+		hsl(360, 100%, 50%)
+	);
+	outline: none;
+}
+
+.osmosis-cp-hue-slider::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background: white;
+	border: 2px solid var(--background-modifier-border);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+	cursor: pointer;
+}
+
+.osmosis-cp-input-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 6px;
+}
+
+.osmosis-cp-preview {
+	width: 28px;
+	height: 28px;
+	border-radius: 4px;
+	background-color: var(--swatch-color);
+	border: 1px solid var(--background-modifier-border);
+	flex-shrink: 0;
+}
+
+.osmosis-cp-hex-input {
+	flex: 1;
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-small);
+	padding: 4px 6px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background: var(--background-primary);
+	color: var(--text-normal);
+	outline: none;
+}
+
+.osmosis-cp-hex-input:focus {
+	border-color: var(--interactive-accent);
+}
+
+.osmosis-cp-hex-input.is-invalid {
+	border-color: var(--text-error);
+}
+
+/* ─── Font Picker ─────────────────────────────────────── */
+
+.osmosis-font-picker {
+	width: 100%;
+}
+
+.osmosis-fp-trigger {
+	display: flex;
+	align-items: center;
+	width: 100%;
+	padding: 4px 8px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background: var(--background-primary);
+	color: var(--text-normal);
+	font-size: var(--font-ui-small);
+	cursor: pointer;
+	text-align: left;
+}
+
+.osmosis-fp-trigger:hover {
+	border-color: var(--interactive-accent);
+}
+
+.osmosis-fp-fallback-badge {
+	font-size: var(--font-ui-smaller);
+	color: var(--text-warning);
+	margin-left: 4px;
+}
+
+.osmosis-font-popover {
+	position: fixed;
+	top: var(--fp-top, 0);
+	left: var(--fp-left, 0);
+	width: var(--fp-width, 200px);
+	max-height: 300px;
+	z-index: var(--layer-popover);
+	background: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	box-shadow: var(--shadow-s);
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.osmosis-fp-search {
+	padding: 6px 8px;
+	border: none;
+	border-bottom: 1px solid var(--background-modifier-border);
+	background: var(--background-primary);
+	color: var(--text-normal);
+	font-size: var(--font-ui-small);
+	outline: none;
+}
+
+.osmosis-fp-list {
+	overflow-y: auto;
+	flex: 1;
+	max-height: 250px;
+}
+
+.osmosis-fp-group-label {
+	padding: 4px 8px 2px;
+	font-size: var(--font-ui-smaller);
+	font-weight: 600;
+	color: var(--text-muted);
+}
+
+.osmosis-fp-item {
+	padding: 4px 8px;
+	cursor: pointer;
+	font-size: var(--font-ui-small);
+	color: var(--text-normal);
+}
+
+.osmosis-fp-item:hover {
+	background: var(--background-modifier-hover);
+}
+
+.osmosis-fp-item.is-selected {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.osmosis-fp-unavailable {
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+	font-style: italic;
+}
+
+/* ─── Utility ────────────────────────────────────────────── */
+
+.osmosis-hidden {
+	display: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Sequential Study Modal
+   ═══════════════════════════════════════════════════════════ */
+
+.osmosis-study-modal {
+	width: 600px;
+	max-width: 90vw;
+	max-height: 85vh;
+}
+
+.osmosis-study-modal .modal-content {
+	overflow-y: auto;
+	padding-bottom: 8px;
+}
+
+/* Constrain images/video inside study cards */
+.osmosis-study-card img,
+.osmosis-study-card video {
+	max-width: 100%;
+	max-height: 50vh;
+	height: auto;
+	object-fit: contain;
+}
+
+.osmosis-study-progress {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 12px;
+}
+
+.osmosis-study-progress-bar {
+	flex: 1;
+	height: 4px;
+	background: var(--background-modifier-border);
+	border-radius: 2px;
+	overflow: hidden;
+}
+
+.osmosis-study-progress-fill {
+	height: 100%;
+	width: var(--osmosis-progress-width, 0%);
+	background: var(--interactive-accent);
+	border-radius: 2px;
+	transition: width 0.3s ease;
+}
+
+.osmosis-study-progress-text {
+	font-size: var(--font-ui-small);
+	color: var(--text-muted);
+	white-space: nowrap;
+}
+
+.osmosis-study-card {
+	padding: 16px;
+	min-height: 120px;
+	max-height: calc(85vh - 120px);
+	overflow-y: auto;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	background: var(--background-primary);
+	margin-bottom: 12px;
+}
+
+.osmosis-study-front {
+	font-size: 16px;
+	margin-bottom: 12px;
+}
+
+.osmosis-study-divider {
+	height: 1px;
+	background: var(--background-modifier-border);
+	margin: 8px 0;
+}
+
+.osmosis-study-back {
+	max-height: 0;
+	opacity: 0;
+	overflow: hidden;
+	transition: max-height 0.3s ease, opacity 0.2s ease;
+}
+
+.osmosis-study-back.is-revealed {
+	max-height: 5000px;
+	opacity: 1;
+}
+
+.osmosis-study-actions {
+	position: relative;
+	display: flex;
+	justify-content: center;
+}
+
+.osmosis-study-actions-left {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	display: flex;
+	gap: 4px;
+}
+
+.osmosis-study-actions-right {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	gap: 4px;
+}
+
+.osmosis-study-icon-btn {
+	padding: 4px;
+	border: none;
+	border-radius: 4px;
+	background: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.osmosis-study-icon-btn:hover {
+	color: var(--text-normal);
+	background: var(--background-modifier-hover);
+}
+
+.osmosis-study-icon-btn[aria-label*="Exclude"]:hover {
+	color: var(--text-error);
+}
+
+.osmosis-contextual-undo {
+	padding: 4px;
+	border-radius: 4px;
+	cursor: pointer;
+	color: var(--text-muted);
+	display: flex;
+	align-items: center;
+}
+
+.osmosis-contextual-undo:hover {
+	color: var(--text-normal);
+	background: var(--background-modifier-hover);
+}
+
+.osmosis-study-flip {
+	padding: 8px 24px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background: var(--background-secondary);
+	color: var(--text-normal);
+	cursor: pointer;
+	font-size: 14px;
+}
+
+.osmosis-study-flip:hover {
+	background: var(--background-modifier-hover);
+}
+
+.osmosis-study-rating-bar {
+	display: flex;
+	gap: 8px;
+	justify-content: center;
+}
+
+.osmosis-study-rating-bar button {
+	padding: 8px 16px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 14px;
+	font-weight: 500;
+	transition: filter 0.1s;
+}
+
+.osmosis-study-rating-bar button:hover {
+	filter: brightness(1.1);
+}
+
+.osmosis-study-rating-bar button.osmosis-rate-again,
+.osmosis-contextual-rating button.osmosis-rate-again {
+	background: hsl(0, 65%, 50%);
+	color: white;
+}
+
+.osmosis-study-rating-bar button.osmosis-rate-hard,
+.osmosis-contextual-rating button.osmosis-rate-hard {
+	background: hsl(30, 65%, 50%);
+	color: white;
+}
+
+.osmosis-study-rating-bar button.osmosis-rate-good,
+.osmosis-contextual-rating button.osmosis-rate-good {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.osmosis-study-rating-bar button.osmosis-rate-easy,
+.osmosis-contextual-rating button.osmosis-rate-easy {
+	background: hsl(140, 50%, 42%);
+	color: white;
+}
+
+.osmosis-study-complete {
+	text-align: center;
+	padding: 24px;
+}
+
+.osmosis-study-complete h2 {
+	margin: 0 0 8px;
+}
+
+.osmosis-study-close-btn {
+	margin-top: 16px;
+	padding: 8px 24px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background: var(--background-secondary);
+	color: var(--text-normal);
+	cursor: pointer;
+}
+
+/* ─── Type-in Cards ─────────────────────────────────────── */
+
+.osmosis-study-typein {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+.osmosis-study-typein-input {
+	flex: 1;
+	padding: 8px 12px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background: var(--background-primary);
+	color: var(--text-normal);
+	font-size: var(--font-ui-medium);
+}
+
+.osmosis-study-typein-input:focus {
+	border-color: var(--interactive-accent);
+	outline: none;
+}
+
+.osmosis-study-typein-submit {
+	padding: 8px 16px;
+	border: none;
+	border-radius: 4px;
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	cursor: pointer;
+	font-weight: 500;
+}
+
+.osmosis-typein-result {
+	margin-top: 8px;
+	padding: 8px 12px;
+	border-radius: 4px;
+	font-size: var(--font-ui-small);
+}
+
+.osmosis-typein-correct {
+	background: hsla(120, 40%, 50%, 0.15);
+	border-left: 3px solid hsl(120, 40%, 50%);
+}
+
+.osmosis-typein-close {
+	background: hsla(40, 80%, 50%, 0.15);
+	border-left: 3px solid hsl(40, 80%, 50%);
+}
+
+.osmosis-typein-wrong {
+	background: hsla(0, 60%, 50%, 0.15);
+	border-left: 3px solid hsl(0, 60%, 50%);
+}
+
+.osmosis-study-rating-bar button.is-suggested {
+	outline: 2px solid var(--interactive-accent);
+	outline-offset: -2px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Dashboard Sidebar
+   ═══════════════════════════════════════════════════════════ */
+
+.osmosis-dashboard {
+	padding: 8px;
+}
+
+.osmosis-dash-header {
+	margin-bottom: 12px;
+}
+
+.osmosis-dash-btn {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+	padding: 8px 12px;
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 14px;
+	font-weight: 500;
+}
+
+.osmosis-dash-btn:hover {
+	filter: brightness(1.1);
+}
+
+.osmosis-dash-empty {
+	padding: 16px 8px;
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+	text-align: center;
+}
+
+.osmosis-dash-deck-row {
+	display: flex;
+	align-items: center;
+	padding: 4px 8px;
+	cursor: pointer;
+	border-radius: 4px;
+	gap: 4px;
+}
+
+.osmosis-dash-depth-1 { padding-left: 24px; }
+.osmosis-dash-depth-2 { padding-left: 40px; }
+.osmosis-dash-depth-3 { padding-left: 56px; }
+
+.osmosis-dash-deck-row:hover {
+	background: var(--background-modifier-hover);
+}
+
+.osmosis-dash-collapse {
+	display: flex;
+	align-items: center;
+	width: 16px;
+	flex-shrink: 0;
+	color: var(--text-muted);
+	cursor: pointer;
+}
+
+.osmosis-dash-collapse svg {
+	width: 14px;
+	height: 14px;
+}
+
+.osmosis-dash-collapse-spacer {
+	width: 16px;
+	flex-shrink: 0;
+}
+
+.osmosis-dash-deck-name {
+	flex: 1;
+	font-size: var(--font-ui-small);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.osmosis-dash-counts {
+	display: flex;
+	gap: 6px;
+	margin-left: auto;
+	flex-shrink: 0;
+}
+
+.osmosis-dash-new,
+.osmosis-dash-learn,
+.osmosis-dash-due {
+	font-size: 11px;
+	font-weight: 600;
+	padding: 1px 5px;
+	border-radius: 3px;
+	min-width: 16px;
+	text-align: center;
+}
+
+.osmosis-dash-new {
+	color: var(--interactive-accent);
+	background: rgba(var(--interactive-accent-rgb, 99, 135, 255), 0.12);
+}
+
+.osmosis-dash-learn {
+	color: hsl(30, 75%, 50%);
+	background: hsla(30, 75%, 50%, 0.12);
+}
+
+.osmosis-dash-due {
+	color: hsl(140, 50%, 42%);
+	background: hsla(140, 50%, 42%, 0.12);
+}
+
+.osmosis-dash-zero {
+	color: var(--text-faint);
+	background: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Contextual Study (Reading View)
+   ═══════════════════════════════════════════════════════════ */
+
+.osmosis-contextual-card {
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	padding: 12px;
+	margin: 8px 0;
+}
+
+.osmosis-contextual-hidden {
+	color: var(--text-faint);
+	letter-spacing: 2px;
+	cursor: pointer;
+	user-select: none;
+}
+
+.osmosis-contextual-hidden:hover {
+	color: var(--text-muted);
+}
+
+.osmosis-contextual-revealed {
+	animation: osmosis-fade-in 0.2s;
+}
+
+.osmosis-contextual-rating {
+	display: flex;
+	gap: 6px;
+	margin-top: 8px;
+}
+
+.osmosis-contextual-rating button {
+	padding: 4px 10px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 12px;
+	font-weight: 500;
+}
+
+.osmosis-contextual-start-btn {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 12px;
+	margin-bottom: 12px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background: var(--background-secondary);
+	color: var(--text-normal);
+	cursor: pointer;
+	font-size: var(--font-ui-small);
+}
+
+.osmosis-contextual-start-btn:hover {
+	background: var(--background-modifier-hover);
+}
+
+.osmosis-contextual-start-btn.is-active {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-color: var(--interactive-accent);
+}
+
+.osmosis-contextual-progress {
+	position: fixed;
+	bottom: 16px;
+	right: 16px;
+	padding: 4px 12px;
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 16px;
+	font-size: 12px;
+	color: var(--text-muted);
+	z-index: 10;
+	box-shadow: var(--shadow-s);
+}
+
+/* ─── Exclude Toggle (Contextual Cards) ──────────────────── */
+
+.osmosis-contextual-bottom {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-top: 4px;
+}
+
+.osmosis-contextual-rating-slot {
+	flex: 1;
+}
+
+.osmosis-contextual-exclude-toggle {
+	cursor: pointer;
+	color: var(--text-muted);
+	opacity: 0.4;
+	transition: opacity 0.15s, color 0.15s;
+	flex-shrink: 0;
+}
+
+.osmosis-contextual-exclude-toggle:hover {
+	opacity: 1;
+	color: var(--text-normal);
+}
+
+.osmosis-contextual-excluded {
+	opacity: 0.45;
+}
+
+.osmosis-contextual-excluded .osmosis-contextual-exclude-toggle {
+	opacity: 0.8;
+	color: var(--text-error);
+}
+
+@keyframes osmosis-fade-in {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Spatial Study (Mind Map)
+   ═══════════════════════════════════════════════════════════ */
+
+.osmosis-spatial-hidden .osmosis-node-content {
+	visibility: hidden;
+}
+
+.osmosis-spatial-hidden .osmosis-node {
+	opacity: 0.5;
+}
+
+.osmosis-spatial-placeholder {
+	fill: var(--text-faint);
+	font-size: 18px;
+	text-anchor: middle;
+	dominant-baseline: central;
+	pointer-events: none;
+}
+
+.osmosis-spatial-revealed .osmosis-node-content {
+	animation: osmosis-fade-in 0.2s;
+}
+
+.osmosis-fence-front-only {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.osmosis-fence-front {
+	text-align: center;
+	color: var(--text-normal);
+	width: 100%;
+}
+
+
+/* ── Chip List (Settings) ──────────────────────────── */
+
+.osmosis-chip-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	align-items: center;
+	min-height: 32px;
+	padding: 4px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	background: var(--background-primary);
+	width: 100%;
+}
+
+.osmosis-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 8px;
+	border-radius: 12px;
+	background: var(--background-modifier-hover);
+	font-size: 12px;
+	line-height: 1.4;
+}
+
+.osmosis-chip-remove {
+	cursor: pointer;
+	opacity: 0.6;
+	font-size: 14px;
+	line-height: 1;
+}
+
+.osmosis-chip-remove:hover {
+	opacity: 1;
+}
+
+.osmosis-chip-input {
+	border: none;
+	background: transparent;
+	outline: none;
+	flex: 1;
+	min-width: 80px;
+	font-size: 13px;
+	padding: 2px 4px;
+}

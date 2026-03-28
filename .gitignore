@@ -1,0 +1,4 @@
+node_modules/
+dist/
+vault/.obsidian/plugins/wotd/main.js
+vault/.obsidian/plugins/wotd/data.json

@@ -1,0 +1,10 @@
+{
+  "id": "wotd",
+  "name": "Word of the Day",
+  "version": "0.0.1",
+  "minAppVersion": "1.10.0",
+  "description": "Captures Merriam-Webster's Word of the Day into an Obsidian note with optional Osmosis flashcards.",
+  "author": "Sawyer Rensel",
+  "authorUrl": "https://github.com/SawyerRensel",
+  "isDesktopOnly": false
+}
