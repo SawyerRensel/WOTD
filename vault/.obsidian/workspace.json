@@ -11,14 +11,10 @@
             "id": "42bf54bb909ff53c",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Untitled.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "Untitled"
+              "title": "New tab"
             }
           }
         ]
@@ -196,7 +192,7 @@
       "osmosis:Osmosis dashboard": false
     }
   },
-  "active": "42bf54bb909ff53c",
+  "active": "7fe14db7beb2ec26",
   "lastOpenFiles": [
     "WOTD/fiscal.md",
     "Untitled.md",

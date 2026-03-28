@@ -556,13 +556,20 @@ export default class WOTDPlugin extends Plugin {
     this.addCommand({
       id: "wotd-insert-link-here",
       name: "Insert link to today's WOTD at cursor",
-      editorCallback: async (editor) => {
+      editorCallback: async (editor, view) => {
         try {
-          const { w, filePath } = await createOrUpdateWotdNote(
+          const { w, file } = await createOrUpdateWotdNote(
             this.app,
             this.settings,
           );
-          editor.replaceSelection(`[[${filePath}|${w.word}]]`);
+          const sourcePath = view.file?.path ?? "";
+          const link = this.app.fileManager.generateMarkdownLink(
+            file,
+            sourcePath,
+            undefined,
+            w.word,
+          );
+          editor.replaceSelection(link);
         } catch (e: unknown) {
           console.error(e);
           new Notice(`WOTD error: ${e instanceof Error ? e.message : String(e)}`);
