@@ -12,7 +12,7 @@ import {
 
 // ----------------------------- Types & defaults -----------------------------
 
-type FlashcardType = "cloze" | "basic" | "bidi";
+type FlashcardType = "cloze" | "basic-word-front" | "basic-definition-front" | "bidi";
 type CalloutStyle = "callout" | "admonition";
 
 interface WOTDSettings {
@@ -382,12 +382,20 @@ function buildOsmosisFlashcard(
         `${buildClozeText(word, definitionPlain)}\n` +
         "```"
       );
-    case "basic":
+    case "basic-word-front":
       return (
         "```osmosis\n" +
         `What does **${word}** mean?\n` +
         "***\n" +
         `${stripWordFromDefinition(word, definitionPlain)}\n` +
+        "```"
+      );
+    case "basic-definition-front":
+      return (
+        "```osmosis\n" +
+        `${stripWordFromDefinition(word, definitionPlain)}\n` +
+        "***\n" +
+        `${word}\n` +
         "```"
       );
     case "bidi":
@@ -418,8 +426,9 @@ function buildNoteContent(w: WotdData, settings: WOTDSettings): string {
     (sec.definitionPlain ? `definition: ${sec.definitionPlain}\n` : "") +
     `source: ${w.link}\n` +
     `published: ${dateISO}\n` +
-    (settings.includeOsmosisFlashcard && settings.osmosisDeck
-      ? `osmosis-deck: ${settings.osmosisDeck}\n`
+    (settings.includeOsmosisFlashcard
+      ? `osmosis-cards: true\n` +
+        (settings.osmosisDeck ? `osmosis-deck: ${settings.osmosisDeck}\n` : "")
       : "") +
     "---\n\n";
 
@@ -700,7 +709,8 @@ class WOTDSettingTab extends PluginSettingTab {
         .addDropdown((dd) =>
           dd
             .addOption("cloze", "Cloze (fill-in-the-blank)")
-            .addOption("basic", "Basic (front / back)")
+            .addOption("basic-word-front", "Basic (word → definition)")
+            .addOption("basic-definition-front", "Basic (definition → word)")
             .addOption("bidi", "Bidirectional")
             .setValue(this.plugin.settings.osmosisFlashcardType)
             .onChange(async (val) => {
